@@ -1,0 +1,136 @@
+#define enA 10
+#define enB 5
+#define in1 9
+#define in2 8
+#define in3 7
+#define in4 6
+
+int estadoMotor = 0;      // 0: parado, 1: avanzar, 2: reversa
+int estadoAnterior = 0;   // Para recordar el estado previo
+int velocidad = 130;      // Velocidad PWM para los motores (0-255)
+const int tiempoPausa = 500;  // Tiempo de pausa en ms entre cambio de dirección
+
+void setup() {
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+  
+  // Comenzar con motores detenidos
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+  analogWrite(enA, 0);
+  analogWrite(enB, 0);
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Verificar si hay datos disponibles en el puerto serial
+  if (Serial.available() > 0) {
+    // Leer el estado enviado desde Processing
+    estadoAnterior = estadoMotor;  // Guardar el estado actual como anterior
+    estadoMotor = Serial.parseInt();
+    
+    // Consumir cualquier caracter extra (como el salto de línea)
+    while (Serial.available() > 0) {
+      Serial.read();
+    }
+    
+    // Confirmar recepción enviando de vuelta el estado
+    Serial.print("Estado recibido: ");
+    Serial.println(estadoMotor);
+    
+    // Aplicar el estado a los motores con protección
+    controlarMotoresConSeguridad(estadoMotor, estadoAnterior);
+  }
+}
+
+void controlarMotoresConSeguridad(int nuevoEstado, int estadoAnterior) {
+  // Si estamos cambiando de avanzar a reversa o viceversa, necesitamos detenernos primero
+  if ((estadoAnterior == 1 && nuevoEstado == 2) || (estadoAnterior == 2 && nuevoEstado == 1)) {
+    // Primero detener los motores
+    controlarMotores(0);
+    
+    // Esperar un tiempo para permitir que los motores se detengan completamente
+    delay(tiempoPausa);
+    
+    // Ahora aplicar el nuevo estado
+    controlarMotores(nuevoEstado);
+  } else {
+    // Si no es un cambio brusco de dirección, aplicar directamente
+    controlarMotores(nuevoEstado);
+  }
+}
+
+void controlarMotores(int estado) {
+  switch (estado) {
+    case 0:  // Parar
+      // Detener motores
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, LOW);
+      digitalWrite(in4, LOW);
+      analogWrite(enA, 0);
+      analogWrite(enB, 0);
+      break;
+      
+    case 1:  // Avanzar
+      // Configurar dirección hacia adelante
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, HIGH);
+      digitalWrite(in4, LOW);
+      // Aplicar velocidad
+      analogWrite(enA, velocidad);
+      analogWrite(enB, velocidad);
+      break;
+      
+    case 2:  // Reversa
+      // Configurar dirección hacia atrás
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, HIGH);
+      digitalWrite(in3, LOW);
+      digitalWrite(in4, HIGH);
+      // Aplicar velocidad
+      analogWrite(enA, velocidad);
+      analogWrite(enB, velocidad);
+      break;
+      
+    case 3:  // Girar a la Izquierda
+      // Motor derecho avanza, motor izquierdo se detiene o retrocede
+      // Para un giro suave, detenemos el motor izquierdo
+      digitalWrite(in1, LOW);    // Motor izquierdo detenido
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, HIGH);   // Motor derecho avanza
+      digitalWrite(in4, LOW);
+      analogWrite(enA, 0);       // Sin velocidad en motor izquierdo
+      analogWrite(enB, velocidad); // Velocidad normal en motor derecho
+      break;
+      
+    case 4:  // Girar a la Derecha
+      // Motor izquierdo avanza, motor derecho se detiene o retrocede
+      // Para un giro suave, detenemos el motor derecho
+      digitalWrite(in1, HIGH);   // Motor izquierdo avanza
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, LOW);    // Motor derecho detenido
+      digitalWrite(in4, LOW);
+      analogWrite(enA, velocidad); // Velocidad normal en motor izquierdo
+      analogWrite(enB, 0);       // Sin velocidad en motor derecho
+      break;
+      
+    default:
+      // Estado no reconocido, detener por seguridad
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, LOW);
+      digitalWrite(in4, LOW);
+      analogWrite(enA, 0);
+      analogWrite(enB, 0);
+      break;
+  }
+}

@@ -1,0 +1,132 @@
+import processing.serial.*;
+Serial port;
+int estado = 0;  // 0: parado, 1: avanzar, 2: reversa, 3: izquierda, 4: derecha
+
+// Definición de botones
+int buttonWidth = 120;
+int buttonHeight = 40;
+int buttonSpacing = 50;
+
+void setup() {
+  size(800, 500);  // Ventana más grande para más botones
+  port = new Serial(this, Serial.list()[0], 9600);
+  textAlign(CENTER, CENTER);
+  textSize(20);
+}
+
+void draw() {
+  background(200);
+  rectMode(CENTER);
+  // Primera fila de botones (Avanzar, Parar, Reversa)
+  // Botón Avanzar
+  if (estado == 1) {
+    fill(0, 255, 0);  // Verde si está activo
+  } else {
+    fill(220);  // Gris claro si está inactivo
+  }
+  rect(width/2 - buttonWidth - buttonSpacing, height/2 - 60, buttonWidth, buttonHeight, 10);
+  fill(0);
+  text("Avanzar", width/2 - buttonWidth - buttonSpacing, height/2 - 60);
+  
+  // Botón Parar
+  if (estado == 0) {
+    fill(255, 0, 0);  // Rojo si está activo
+  } else {
+    fill(220);  // Gris claro si está inactivo
+  }
+  rect(width/2, height/2 - 60, buttonWidth, buttonHeight, 10);
+  fill(0);
+  text("Parar", width/2, height/2 - 60);
+  
+  // Botón Reversa
+  if (estado == 2) {
+    fill(0, 0, 255);  // Azul si está activo
+  } else {
+    fill(220);  // Gris claro si está inactivo
+  }
+  rect(width/2 + buttonWidth + buttonSpacing, height/2 - 60, buttonWidth, buttonHeight, 10);
+  fill(0);
+  text("Reversa", width/2 + buttonWidth + buttonSpacing, height/2 - 60);
+  
+  // Segunda fila para los botones de giro
+  // Botón Izquierda
+  if (estado == 3) {
+    fill(255, 165, 0);  // Naranja si está activo
+  } else {
+    fill(220);  // Gris claro si está inactivo
+  }
+  rect(width/2 - buttonWidth/2 - buttonSpacing - buttonWidth, height/2 + 20, buttonWidth, buttonHeight, 10);
+  fill(0);
+  text("Izquierda", width/2 - buttonWidth/2 - buttonSpacing - buttonWidth, height/2 + 20);
+  
+  // Botón Derecha
+  if (estado == 4) {
+    fill(255, 165, 0);  // Naranja si está activo
+  } else {
+    fill(220);  // Gris claro si está inactivo
+  }
+  rect(width/2 + buttonWidth/2 + buttonSpacing, height/2 + 20, buttonWidth, buttonHeight, 10);
+  fill(0);
+  text("Derecha", width/2 + buttonWidth/2 + buttonSpacing, height/2 + 20);
+  
+  // Muestra el estado actual
+  fill(0);
+  textSize(24);
+  String estadoTexto = "";
+  if (estado == 0) estadoTexto = "Detenido";
+  else if (estado == 1) estadoTexto = "Avanzando";
+  else if (estado == 2) estadoTexto = "En reversa";
+  else if (estado == 3) estadoTexto = "Girando a la izquierda";
+  else if (estado == 4) estadoTexto = "Girando a la derecha";
+  
+  text("Estado: " + estadoTexto, width/2, height/2 + 100);
+}
+
+void mousePressed() {
+  // Primera fila de botones (Avanzar, Parar, Reversa)
+  
+  // Verificar si se hizo clic en el botón Avanzar
+  if (mouseX > width/2 - buttonWidth*1.5 - buttonSpacing && 
+      mouseX < width/2 - buttonSpacing && 
+      mouseY > height/2 - 60 - buttonHeight/2 && 
+      mouseY < height/2 - 60 + buttonHeight/2) {
+    estado = 1;
+    port.write(estado + "\n");
+  }
+  // Verificar si se hizo clic en el botón Parar
+  else if (mouseX > width/2 - buttonWidth/2 && 
+           mouseX < width/2 + buttonWidth/2 && 
+           mouseY > height/2 - 60 - buttonHeight/2 && 
+           mouseY < height/2 - 60 + buttonHeight/2) {
+    estado = 0;
+    port.write(estado + "\n");
+  }
+  // Verificar si se hizo clic en el botón Reversa
+  else if (mouseX > width/2 + buttonSpacing && 
+           mouseX < width/2 + buttonWidth + buttonSpacing*2 && 
+           mouseY > height/2 - 60 - buttonHeight/2 && 
+           mouseY < height/2 - 60 + buttonHeight/2) {
+    estado = 2;
+    port.write(estado + "\n");
+  }
+  
+  // Segunda fila - botones de giro
+  // Verificar si se hizo clic en el botón Izquierda
+  else if (mouseX > width/2 - buttonWidth*1.5 - buttonSpacing && 
+           mouseX < width/2 - buttonWidth/2 - buttonSpacing && 
+           mouseY > height/2 + 20 - buttonHeight/2 && 
+           mouseY < height/2 + 20 + buttonHeight/2) {
+    estado = 3;
+    port.write(estado + "\n");
+  }
+  // Verificar si se hizo clic en el botón Derecha
+  else if (mouseX > width/2 + buttonWidth/2 + buttonSpacing && 
+           mouseX < width/2 + buttonWidth*1.5 + buttonSpacing && 
+           mouseY > height/2 + 20 - buttonHeight/2 && 
+           mouseY < height/2 + 20 + buttonHeight/2) {
+    estado = 4;
+    port.write(estado + "\n");
+  }
+  
+  println("Estado actual: " + estado);
+}
