@@ -2,6 +2,8 @@ import processing.serial.*;
 Serial port;
 int estado = 0;  // 0: parado, 1: avanzar, 2: reversa, 3: izquierda, 4: derecha
 PImage webImg;
+PImage paintImg;
+PImage controlImg;
 
 // Variables para el área de dibujo
 boolean modoDibujo = false;// Si está en modo dibujo o no
@@ -63,6 +65,8 @@ void dibujarAreaDibujo() {
   textSize(16);
   textAlign(CENTER);
   text("Área de Dibujo ", areaX + areaAncho/2, areaY - 20);
+  paintImg = loadImage("https://img.icons8.com/?size=18&id=ebCLKs-3cgGW&format=png&color=000000", "png");
+  image(paintImg, areaX + areaAncho/2 + 60 , 25);
   
   // Dibujar todas las líneas
   strokeWeight(2);
@@ -103,6 +107,8 @@ void dibujarControlesCarro() {
   fill(0);
   textSize(16);
   text("Controles del carro", 600, 25);
+  controlImg = loadImage("https://img.icons8.com/?size=18&id=rCMgUHUAhuWi&format=png&color=000000", "png");
+  image(controlImg, 677, 28);
   
   // Primera fila de botones (Avanzar, Parar, Reversa)
   int startY = areaY;
@@ -254,20 +260,20 @@ void moverEnDireccion(int direccion) {
 
 void mousePressed() {
   // Controles del robot
-  if (mouseX >= 500 && mouseX <= 600 && mouseY >= 110 && mouseY <= 145) {
+  if (mouseX >= 502 && mouseX <= 602 && mouseY >= 50 && mouseY <= 82) {
     moverEnDireccion(1); // Avanzar
   }
-  else if (mouseX >= 610 && mouseX <= 710 && mouseY >= 110 && mouseY <= 145) {
+  else if (mouseX >= 610 && mouseX <= 710 && mouseY >= 50 && mouseY <= 82) {
     estado = 0; // Parar
     port.write(estado + "\n");
   }
-  else if (mouseX >= 555 && mouseX <= 655 && mouseY >= 160 && mouseY <= 195) {
+  else if (mouseX >= 555 && mouseX <= 655 && mouseY >= 99 && mouseY <= 130) {
     moverEnDireccion(2); // Reversa
   }
-  else if (mouseX >= 500 && mouseX <= 600 && mouseY >= 210 && mouseY <= 245) {
+  else if (mouseX >= 502 && mouseX <= 602 && mouseY >= 147 && mouseY <= 177) {
     moverEnDireccion(3); // Izquierda
   }
-  else if (mouseX >= 610 && mouseX <= 710 && mouseY >= 210 && mouseY <= 245) {
+  else if (mouseX >= 610 && mouseX <= 710 && mouseY >= 147 && mouseY <= 177) {
     moverEnDireccion(4); // Derecha
   }
   
