@@ -75,9 +75,9 @@ void draw() {
   textAlign(LEFT);
   textSize(10);
   if (port != null) {
-    text("Bluetooth conectado", 10, height - 10);
+    text(" Bluetooth conectado", 10, height - 10);
   } else {
-    text("Bluetooth desconectado", 10, height - 10);
+    text(" Bluetooth desconectado", 10, height - 10);
   }
 }
 
@@ -235,9 +235,17 @@ void dibujarInformacion() {
   else if (estado == 4) estadoTexto = "Girando izquierda"; // CAMBIO
   
   text("Estado carro: " + estadoTexto, 500, 340);
+  text("Posición: (" + int(posicionActual.x - areaX) + ", " + int(posicionActual.y - areaY) + ")", 500, 360);
+  text("Líneas dibujadas: " + contarLineasDibujo(), 500, 380);
 }
 
-
+int contarLineasDibujo() {
+  int contador = 0;
+  for (Linea linea : lineas) {
+    if (linea.esDibujo) contador++;
+  }
+  return contador;
+}
 
 void moverEnDireccion(int direccion) {
   PVector nuevaPosicion = posicionActual.copy();
@@ -269,14 +277,13 @@ void moverEnDireccion(int direccion) {
     // Actualizar posición
     posicionActual = nuevaPosicion;
     
-    // CAMBIO: Enviar como STRING con salto de línea (como hacías antes)
+    // CAMBIO PRINCIPAL: Enviar como número entero, no string
     estado = direccion;
     
     // DEBUG: Ver qué se está enviando
     if (port != null) {
-      String comando = str(estado) + "\n";
-      port.write(comando);
-      println("✓ Enviado por Bluetooth: '" + comando.trim() + "'");
+      port.write(estado); // Sin "\n", solo el número
+      println("✓ Enviado por Bluetooth: " + estado);
     } else {
       println("✗ ERROR: Puerto Bluetooth no conectado");
     }
@@ -291,9 +298,8 @@ void mousePressed() {
   else if (mouseX >= 610 && mouseX <= 710 && mouseY >= 50 && mouseY <= 82) {
     estado = 0; // Parar
     if (port != null) {
-      String comando = str(estado) + "\n";
-      port.write(comando);
-      println("✓ Enviado PARAR: '" + comando.trim() + "'");
+      port.write(estado); // CAMBIO: Sin "\n"
+      println("✓ Enviado PARAR: " + estado);
     }
   }
   else if (mouseX >= 555 && mouseX <= 655 && mouseY >= 99 && mouseY <= 130) {
